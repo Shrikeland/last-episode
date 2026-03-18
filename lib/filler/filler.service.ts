@@ -138,12 +138,31 @@ async function applyFillersToDB(
 
   if (!episodeRows || episodeRows.length === 0) return
 
-  // Build season_id → absolute offset map
   type SeasonRow = { id: string; season_number: number; episode_count: number }
+  type EpisodeRow = { id: string; season_id: string; episode_number: number }
+
   const sortedSeasons = (seasonRows as SeasonRow[]).sort(
     (a, b) => a.season_number - b.season_number
   )
+  const typedEpisodes = episodeRows as EpisodeRow[]
 
+  // Detect TMDB episode numbering scheme:
+  // - Continuous: season 2 episodes start at N+1 (e.g. 53, 54...)
+  //   → episode_number IS already the absolute number, no offset needed
+  // - Per-season: season 2 episodes restart at 1
+  //   → absolute = seasonOffset + episode_number
+  let usesContinuousNumbering = false
+  if (sortedSeasons.length > 1) {
+    const s2Id = sortedSeasons[1].id
+    const s2MinEp = Math.min(
+      ...typedEpisodes
+        .filter((e) => e.season_id === s2Id)
+        .map((e) => e.episode_number)
+    )
+    usesContinuousNumbering = s2MinEp > 1
+  }
+
+  // Build offset map (only used when per-season numbering)
   const offsetMap = new Map<string, number>()
   let offset = 0
   for (const s of sortedSeasons) {
@@ -152,12 +171,12 @@ async function applyFillersToDB(
   }
 
   // Find episode IDs that are fillers
-  type EpisodeRow = { id: string; season_id: string; episode_number: number }
   const fillerEpisodeIds: string[] = []
 
-  for (const ep of episodeRows as EpisodeRow[]) {
-    const seasonOffset = offsetMap.get(ep.season_id) ?? 0
-    const absoluteNum = seasonOffset + ep.episode_number
+  for (const ep of typedEpisodes) {
+    const absoluteNum = usesContinuousNumbering
+      ? ep.episode_number
+      : (offsetMap.get(ep.season_id) ?? 0) + ep.episode_number
     if (fillerSet.has(absoluteNum)) {
       fillerEpisodeIds.push(ep.id)
     }
