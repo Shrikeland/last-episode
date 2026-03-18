@@ -57,7 +57,7 @@ export function MediaCard({ item }: MediaCardProps) {
       data-testid={`media-card-${item.id}`}
     >
       {/* Постер */}
-      <Link href={`/library/${item.id}`} className="block">
+      <Link href={`/media/${item.id}`} className="block">
         <div className="relative aspect-[2/3] bg-secondary">
           {item.poster_url ? (
             <Image
@@ -107,7 +107,7 @@ export function MediaCard({ item }: MediaCardProps) {
 
       {/* Инфо */}
       <div className="p-3 space-y-1.5">
-        <Link href={`/library/${item.id}`} className="block">
+        <Link href={`/media/${item.id}`} className="block">
           <h3 className="font-medium text-sm leading-tight line-clamp-2 hover:text-primary transition-colors">
             {item.title}
           </h3>
