@@ -1,0 +1,44 @@
+'use server'
+
+import * as TmdbService from '@/lib/tmdb/tmdb.service'
+import * as MediaService from '@/lib/supabase/media'
+import { createSeasonsAndEpisodes } from '@/lib/supabase/progress'
+import { createServerClient } from '@/lib/supabase/server'
+import type { TmdbSearchResult, MediaType } from '@/types'
+
+export async function searchTmdb(query: string): Promise<TmdbSearchResult[]> {
+  try {
+    return await TmdbService.search(query)
+  } catch {
+    return []
+  }
+}
+
+export async function addMediaItem(
+  tmdbId: number,
+  type: MediaType
+): Promise<{ success: boolean; error?: 'already_exists' | 'tmdb_error' | 'db_error' }> {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'db_error' }
+
+  let details
+  try {
+    if (type === 'movie') {
+      details = await TmdbService.getMovieDetails(tmdbId)
+    } else {
+      details = await TmdbService.getTVDetails(tmdbId, type)
+    }
+  } catch {
+    return { success: false, error: 'tmdb_error' }
+  }
+
+  const result = await MediaService.createMediaItem(supabase, user.id, details)
+  if (result.error) return { success: false, error: result.error }
+
+  if ((type === 'tv' || type === 'anime') && details.seasons?.length && result.item) {
+    await createSeasonsAndEpisodes(supabase, result.item.id, details.seasons)
+  }
+
+  return { success: true }
+}

@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Last Episode — "Naruto grown-up" dark cinematic seinen theme */
+  :root {
+    --background: 215 28% 7%;
+    --foreground: 210 33% 96%;
+
+    --card: 213 32% 17%;
+    --card-foreground: 210 33% 96%;
+
+    --popover: 213 32% 17%;
+    --popover-foreground: 210 33% 96%;
+
+    --primary: 29 79% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 213 31% 22%;
+    --secondary-foreground: 210 33% 96%;
+
+    --muted: 213 32% 17%;
+    --muted-foreground: 210 14% 60%;
+
+    --accent: 29 79% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 213 31% 25%;
+    --input: 213 31% 25%;
+    --ring: 29 79% 52%;
+
+    --radius: 0.75rem;
+
+    /* Status colors */
+    --status-watching: 210 89% 60%;
+    --status-completed: 142 71% 45%;
+    --status-planned: 210 14% 60%;
+    --status-dropped: 0 72% 51%;
+    --status-on-hold: 38 89% 51%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
