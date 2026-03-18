@@ -105,7 +105,9 @@ export function FilterBar({ currentFilters }: FilterBarProps) {
       <Select
         value={`${currentFilters.sort ?? 'created_at'}_${currentFilters.dir ?? 'desc'}`}
         onValueChange={(v) => {
-          const [field, dir] = v.split('_')
+          const lastUnderscore = v.lastIndexOf('_')
+          const field = v.slice(0, lastUnderscore)
+          const dir = v.slice(lastUnderscore + 1)
           updateUrl({ sort: field, dir })
         }}
       >
