@@ -19,6 +19,14 @@ import {
 
 const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/
 
+function getUsernameError(value: string): string | null {
+  if (!value) return null
+  if (/\s/.test(value)) return 'Пробелы не допускаются — используй _ вместо пробела'
+  if (!/^[a-z0-9_]+$/.test(value)) return 'Только латинские буквы a–z, цифры 0–9 и символ _'
+  if (value.length < 3) return 'Минимум 3 символа'
+  return null
+}
+
 function mapAuthError(message: string): string {
   if (message.includes('User already registered')) return 'Пользователь с таким email уже существует'
   if (message.includes('Password should be at least')) return 'Пароль должен содержать минимум 6 символов'
@@ -96,10 +104,17 @@ export default function RegisterPage() {
               required
               autoComplete="username"
               data-testid="register-username-input"
+              className={getUsernameError(username) ? 'border-destructive focus-visible:ring-destructive' : ''}
             />
-            <p className="text-xs text-muted-foreground">
-              3–20 символов: a-z, 0-9, _ (по нему вас найдут другие)
-            </p>
+            {getUsernameError(username) ? (
+              <p className="text-xs text-destructive">
+                {getUsernameError(username)}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                По нему вас найдут другие — как username в Telegram
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
