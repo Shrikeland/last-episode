@@ -6,19 +6,20 @@ import { toast } from 'sonner'
 import { createBrowserClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Film, Search, BarChart2, LogOut } from 'lucide-react'
+import { Film, PlusCircle, BarChart2, LogOut, Users } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '/library', label: 'Библиотека', icon: Film },
-  { href: '/search', label: 'Поиск', icon: Search },
+  { href: '/search', label: 'Добавить', icon: PlusCircle },
   { href: '/stats', label: 'Статистика', icon: BarChart2 },
+  { href: '/community', label: 'Сообщество', icon: Users },
 ] as const
 
 interface NavbarProps {
-  userEmail: string
+  username: string
 }
 
-export function Navbar({ userEmail }: NavbarProps) {
+export function Navbar({ username }: NavbarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createBrowserClient()
@@ -58,7 +59,7 @@ export function Navbar({ userEmail }: NavbarProps) {
                 data-testid={`navbar-link-${href.replace('/', '')}`}
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors',
-                  pathname === href
+                  pathname === href || pathname.startsWith(href + '/')
                     ? 'bg-accent/10 text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 )}
@@ -71,12 +72,13 @@ export function Navbar({ userEmail }: NavbarProps) {
 
           {/* User Menu */}
           <div className="flex items-center gap-3">
-            <span
-              className="hidden sm:block text-sm text-muted-foreground truncate max-w-[160px]"
-              data-testid="navbar-user-email"
+            <Link
+              href={`/profile/${username}`}
+              className="hidden sm:block text-sm text-muted-foreground truncate max-w-[160px] hover:text-foreground transition-colors"
+              data-testid="navbar-username"
             >
-              {userEmail}
-            </span>
+              @{username}
+            </Link>
             <Button
               variant="ghost"
               size="sm"

@@ -123,6 +123,15 @@ export interface WatchStats {
   topGenres: { genre: string; count: number }[]
 }
 
+// Profile
+export interface Profile {
+  id: string
+  username: string
+  avatar_url: string | null
+  is_library_public: boolean
+  created_at: string
+}
+
 // Database types for Supabase typed client
 export type Database = {
   public: {
@@ -141,6 +150,11 @@ export type Database = {
         Row: Episode
         Insert: Omit<Episode, 'id'>
         Update: Partial<Omit<Episode, 'id' | 'season_id'>>
+      }
+      profiles: {
+        Row: Profile
+        Insert: Omit<Profile, 'created_at'>
+        Update: Partial<Omit<Profile, 'id' | 'created_at'>>
       }
     }
   }

@@ -16,9 +16,15 @@ export default async function AppLayout({
     redirect('/login')
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('id', user.id)
+    .single()
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar userEmail={user.email ?? ''} />
+      <Navbar username={profile?.username ?? user.email ?? ''} />
       <main className="flex-1 container max-w-7xl mx-auto px-4 py-8">
         {children}
       </main>

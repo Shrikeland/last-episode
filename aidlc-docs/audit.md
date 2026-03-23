@@ -121,3 +121,35 @@
 **Context**: CONSTRUCTION PHASE - Unit 3 COMPLETE → Unit 4 Statistics
 
 ---
+
+## Construction - Unit 7: Social Layer - Functional Design Start
+**Timestamp**: 2026-03-23T00:00:00Z
+**User Input**: "Давай переходить к реализации Unit 7 по aidlc. Я хочу расширить свой проект для других людей. Для этого мне нужно: добавить при авторизации ввод логина, чтобы можно было найти друга по логину. Далее необходимо как раз реализовать эту возможность найти других пользователей на площадке (это будет как очередной "Поиск" в шапке сайта, который уже там есть, поэтому нужно будет подумать над наименованиями разделов). При переходе в карточку пользователя я должен буду видеть информацию о нем и такую же статистику, которая уже отслеживается по просмотрам. В общем, у тебя есть примерное понимание того, что я хочу, поэтому давай подумаем над лучшим подходом к реализации и будем приступать."
+**AI Response**: Проведён Functional Design. Заданы уточняющие вопросы по навигации, приватности, username.
+**Context**: CONSTRUCTION PHASE - Unit 7 Social Layer - Functional Design
+
+---
+
+## Construction - Unit 7: Social Layer - Design Answers
+**Timestamp**: 2026-03-23T00:05:00Z
+**User Input**: "1. Да, мне нравится "Добавить" + "Сообщество"."
+**AI Response**: Продолжены уточняющие вопросы (Q2, Q3).
+**Context**: CONSTRUCTION PHASE - Unit 7 - Functional Design - Q1 answered
+
+---
+
+## Construction - Unit 7: Social Layer - Design Answers (continued)
+**Timestamp**: 2026-03-23T00:10:00Z
+**User Input**: "2. Давай сделаем полную библиотеку, но с возможностью скрыть её (не обязательно реализовывать сейчас, заложим этот тоггл для профиля пользователя, который будем разрабатывать дальше). 3. Только латиница."
+**AI Response**: Все ответы получены. Начата Code Generation (без отдельного approval — пользователь инициировал реализацию явно). Созданы 11 файлов Unit 7 (миграция, типы, регистрация, layout, navbar, actions, community, profile страницы и компоненты).
+**Context**: CONSTRUCTION PHASE - Unit 7 - Design COMPLETE → Code Generation COMPLETE
+
+---
+
+## Construction - Unit 7: Social Layer - Build Verification
+**Timestamp**: 2026-03-23T00:15:00Z
+**User Input**: "1. Ты не зафиксировал Unit7 в aidlc-docs. [...] 2. Ты должен сам собрать проект [...] 3. Ты также должен сам запускать необходимые миграции [...]"
+**AI Response**: Созданы все AIDLC-документы Unit 7 (functional-design, infrastructure-design, code, plans). Обновлены aidlc-state.md (Unit 7 ✓), audit.md. npm run build ✓ — маршруты /community и /profile/[username] подтверждены. npx supabase db push ✓ — миграция 20260323000000_profiles.sql применена. Закоммичено и запушено в GitHub.
+**Context**: CONSTRUCTION PHASE - Unit 7 Social Layer COMPLETE
+
+---

@@ -17,15 +17,19 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/
+
 function mapAuthError(message: string): string {
   if (message.includes('User already registered')) return 'Пользователь с таким email уже существует'
   if (message.includes('Password should be at least')) return 'Пароль должен содержать минимум 6 символов'
+  if (message.includes('duplicate') || message.includes('unique') || message.includes('profiles')) return 'Этот логин уже занят'
   return 'Не удалось создать аккаунт. Попробуйте снова'
 }
 
 export default function RegisterPage() {
   const router = useRouter()
   const supabase = createBrowserClient()
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -34,6 +38,10 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    if (!USERNAME_REGEX.test(username)) {
+      toast.error('Логин: 3–20 символов, только a-z, 0-9 и _')
+      return
+    }
     if (password.length < 6) {
       toast.error('Пароль должен содержать минимум 6 символов')
       return
@@ -45,11 +53,14 @@ export default function RegisterPage() {
 
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } },
+      })
       if (error) {
         toast.error(mapAuthError(error.message))
       } else if (!data.session) {
-        // Email confirmation включена в Supabase — сессия не создана сразу
         toast.info('Проверьте email для подтверждения регистрации')
       } else {
         toast.success('Аккаунт создан!')
@@ -74,6 +85,23 @@ export default function RegisterPage() {
 
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form">
+          <div className="space-y-2">
+            <Label htmlFor="username">Логин</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="например: ivan_petrov"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase())}
+              required
+              autoComplete="username"
+              data-testid="register-username-input"
+            />
+            <p className="text-xs text-muted-foreground">
+              3–20 символов: a-z, 0-9, _ (по нему вас найдут другие)
+            </p>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
