@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { toast } from 'sonner'
 import { createBrowserClient } from '@/lib/supabase/client'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, MailCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,7 +28,7 @@ function getUsernameError(value: string): string | null {
 }
 
 function mapAuthError(message: string): string {
-  if (message.includes('User already registered')) return 'Пользователь с таким email уже существует'
+  if (message.includes('User already registered')) return 'Пользователь с таким email уже зарегистрирован'
   if (message.includes('Password should be at least')) return 'Пароль должен содержать минимум 6 символов'
   if (message.includes('duplicate') || message.includes('unique') || message.includes('profiles')) return 'Этот логин уже занят'
   return 'Не удалось создать аккаунт. Попробуйте снова'
@@ -45,20 +44,23 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setFormError(null)
 
     if (!USERNAME_REGEX.test(username)) {
-      toast.error('Логин: 3–20 символов, только a-z, 0-9 и _')
+      setFormError('Логин: 3–20 символов, только a-z, 0-9 и _')
       return
     }
     if (password.length < 6) {
-      toast.error('Пароль должен содержать минимум 6 символов')
+      setFormError('Пароль должен содержать минимум 6 символов')
       return
     }
     if (password !== confirmPassword) {
-      toast.error('Пароли не совпадают')
+      setFormError('Пароли не совпадают')
       return
     }
 
@@ -70,17 +72,36 @@ export default function RegisterPage() {
         options: { data: { username } },
       })
       if (error) {
-        toast.error(mapAuthError(error.message))
+        setFormError(mapAuthError(error.message))
       } else if (!data.session) {
-        toast.info('Проверьте email для подтверждения регистрации')
+        setSubmitted(true)
       } else {
-        toast.success('Аккаунт создан!')
         router.push('/library')
         router.refresh()
       }
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (submitted) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
+          <MailCheck className="h-12 w-12 text-primary" />
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold tracking-tight">Письмо отправлено!</h2>
+            <p className="text-sm text-muted-foreground">
+              Проверьте <span className="text-foreground font-medium">{email}</span> и нажмите на
+              ссылку для подтверждения регистрации.
+            </p>
+            <p className="text-xs text-muted-foreground pt-2">
+              Не пришло письмо? Проверьте папку «Спам».
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -185,6 +206,12 @@ export default function RegisterPage() {
               </button>
             </div>
           </div>
+
+          {formError && (
+            <p className="text-sm text-destructive text-center" data-testid="register-form-error">
+              {formError}
+            </p>
+          )}
 
           <Button
             type="submit"

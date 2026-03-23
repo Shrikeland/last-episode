@@ -32,7 +32,11 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isAuthPage = pathname === '/login' || pathname === '/register'
+  const isAuthPage =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/email-confirmed' ||
+    pathname.startsWith('/auth/')
 
   // Авторизованный на странице входа → в библиотеку
   if (user && isAuthPage) {

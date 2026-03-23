@@ -1,5 +1,15 @@
 # AI-DLC Audit Log
 
+## Unit 8 - Auth UX Improvement
+**Timestamp**: 2026-03-24T00:00:00Z
+**Summary**: Улучшение UX регистрации и подтверждения email.
+**Changes**:
+- `app/(auth)/register/page.tsx` — форма заменяется success-state после отправки; inline ошибки вместо toast
+- `app/auth/callback/route.ts` (NEW) — PKCE exchange code → session; редирект на /email-confirmed или /register?error=...
+- `app/(auth)/email-confirmed/page.tsx` (NEW) — страница успеха со ссылкой на /login
+- `proxy.ts` — добавлены `/email-confirmed` и `/auth/**` в публичные маршруты
+**Build**: npm run build ✓ (0 errors)
+
 ## Workspace Detection
 **Timestamp**: 2026-03-17T00:00:00Z
 **User Input**: "Нужно написать MVP-версию для пет-проекта. Проект будет использоваться мной как некий кинотеатр, но без плеера: я буду добавлять в него фильмы/сериалы/аниме, и отслеживать прогресс просмотренных серий. Хорошо подумай над предварительной реализацией и архитектурой, чтобы первая версия задала прочный фундамент, который мы потом будем улучшать. Технологический стек: Next.js + TS + Supabase + Tailwind + shadcn/ui, т.к. у меня есть базовые знания TypeScript/React и в целом этот стек считается подходящим/перспективным."

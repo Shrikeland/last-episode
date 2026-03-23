@@ -20,7 +20,7 @@
 | Security Baseline | No | Requirements Analysis |
 
 ## Execution Plan Summary
-- **Total Units**: 7 (Foundation, Media Library, Title Detail + Progress, Statistics, Anime Filler Detection, Library Redesign, Social Layer)
+- **Total Units**: 8 (Foundation, Media Library, Title Detail + Progress, Statistics, Anime Filler Detection, Library Redesign, Social Layer, Auth UX Improvement)
 - **Stages to Execute**: Workspace Detection, Requirements Analysis, Workflow Planning, Application Design, Units Generation, Functional Design (x6), Infrastructure Design (x6), Code Generation (x6), Build and Test
 - **Stages to Skip**: User Stories, NFR Requirements, NFR Design
 
@@ -70,6 +70,11 @@
   - [x] Infrastructure Design
   - [x] Code Generation
   - [x] Build Verification — npm run build ✓ (profiles table, /community, /profile/[username])
+- [x] Unit 8 - Auth UX Improvement
+  - [x] Functional Design
+  - [x] Infrastructure Design
+  - [x] Code Generation
+  - [x] Build Verification — npm run build ✓ (/auth/callback, /email-confirmed, register inline errors)
 - [ ] Build and Test
 
 ### OPERATIONS PHASE
@@ -78,4 +83,4 @@
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
 - **Current Stage**: CONSTRUCTION PHASE — Build and Test
-- **Status**: All 7 units complete (builds verified). Ready for final Build and Test phase (deploy to Vercel + Supabase Cloud).
+- **Status**: All 8 units complete (builds verified). Ready for final Build and Test phase (deploy to Vercel + Supabase Cloud).
