@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Search } from 'lucide-react'
-import { MEDIA_STATUS_LABELS, MEDIA_TYPE_LABELS } from '@/types'
-import type { MediaStatus, MediaType } from '@/types'
+import { MEDIA_STATUS_LABELS } from '@/types'
+import type { MediaStatus } from '@/types'
 
 interface FilterBarProps {
   currentFilters: {
@@ -83,24 +83,6 @@ export function FilterBar({ currentFilters }: FilterBarProps) {
           {(Object.keys(MEDIA_STATUS_LABELS) as MediaStatus[]).map((s) => (
             <SelectItem key={s} value={s}>
               {MEDIA_STATUS_LABELS[s]}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {/* Тип */}
-      <Select
-        value={currentFilters.type ?? 'all'}
-        onValueChange={(v) => updateUrl({ type: v })}
-      >
-        <SelectTrigger className="w-[140px]">
-          <SelectValue placeholder="Тип" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Все типы</SelectItem>
-          {(Object.keys(MEDIA_TYPE_LABELS) as MediaType[]).map((t) => (
-            <SelectItem key={t} value={t}>
-              {MEDIA_TYPE_LABELS[t]}
             </SelectItem>
           ))}
         </SelectContent>

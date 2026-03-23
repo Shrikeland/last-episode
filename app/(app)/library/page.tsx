@@ -1,8 +1,8 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { getMediaItems } from '@/lib/supabase/media'
 import { FilterBar } from '@/components/library/FilterBar'
-import { MediaGrid } from '@/components/library/MediaGrid'
-import type { MediaFilters, SortOptions, MediaStatus, MediaType, SortField, SortDirection } from '@/types'
+import { LibrarySections } from '@/components/library/LibrarySections'
+import type { MediaFilters, SortOptions, MediaStatus, SortField, SortDirection } from '@/types'
 
 interface SearchParams {
   search?: string
@@ -28,7 +28,6 @@ export default async function LibraryPage({
   const filters: MediaFilters = {
     search: params.search || undefined,
     status: (params.status as MediaStatus | 'all') || 'all',
-    type: (params.type as MediaType | 'all') || 'all',
     genre: params.genre || undefined,
   }
 
@@ -39,7 +38,7 @@ export default async function LibraryPage({
 
   const items = await getMediaItems(supabase, user.id, filters, sort)
 
-  const hasFilters = !!(params.search || (params.status && params.status !== 'all') || (params.type && params.type !== 'all') || params.genre)
+  const hasFilters = !!(params.search || (params.status && params.status !== 'all'))
 
   return (
     <div className="space-y-6">
@@ -48,7 +47,7 @@ export default async function LibraryPage({
         <span className="text-sm text-muted-foreground">{items.length} тайтлов</span>
       </div>
       <FilterBar currentFilters={params} />
-      <MediaGrid items={items} hasFilters={hasFilters} />
+      <LibrarySections items={items} hasFilters={hasFilters} />
     </div>
   )
 }
