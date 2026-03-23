@@ -36,7 +36,7 @@ export function ProfileMediaCard({ item }: ProfileMediaCardProps) {
       </div>
 
       <div className="p-3 space-y-1.5">
-        <h3 className="font-medium text-sm leading-tight line-clamp-2">{item.title}</h3>
+        <h3 className="font-medium text-sm leading-tight line-clamp-2 min-h-[2.2rem]">{item.title}</h3>
 
         <div className="flex items-center gap-1.5 flex-wrap">
           <Badge variant="secondary" className="text-xs px-1.5 py-0">

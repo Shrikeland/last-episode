@@ -108,7 +108,7 @@ export function MediaCard({ item }: MediaCardProps) {
       {/* Инфо */}
       <div className="p-3 space-y-1.5">
         <Link href={`/media/${item.id}`} className="block">
-          <h3 className="font-medium text-sm leading-tight line-clamp-2 hover:text-primary transition-colors">
+          <h3 className="font-medium text-sm leading-tight line-clamp-2 min-h-[2.2rem] hover:text-primary transition-colors">
             {item.title}
           </h3>
         </Link>
