@@ -21,6 +21,18 @@ export async function markSeason(
   await ProgressService.markSeasonWatched(supabase, seasonId, isWatched)
 }
 
+export async function markAllTitle(
+  mediaItemId: string,
+  isWatched: boolean
+): Promise<void> {
+  const supabase = await createServerClient()
+  if (isWatched) {
+    await ProgressService.markAllEpisodesWatched(supabase, mediaItemId)
+  } else {
+    await ProgressService.markAllEpisodesUnwatched(supabase, mediaItemId)
+  }
+}
+
 export async function updateStatus(
   mediaItemId: string,
   status: MediaStatus,

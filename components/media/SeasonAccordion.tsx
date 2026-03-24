@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { toast } from 'sonner'
+import { CheckCircle2 } from 'lucide-react'
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { EpisodeRow } from './EpisodeRow'
-import { toggleEpisode, markSeason } from '@/app/actions/progress'
+import { toggleEpisode, markSeason, markAllTitle } from '@/app/actions/progress'
 import type { SeasonWithEpisodes, Episode } from '@/types'
 
 interface SeasonAccordionProps {
@@ -39,7 +40,7 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-export function SeasonAccordion({ seasons, mediaItemId: _mediaItemId }: SeasonAccordionProps) {
+export function SeasonAccordion({ seasons, mediaItemId }: SeasonAccordionProps) {
   const [episodeMap, setEpisodeMap] = useState<EpisodeMap>(() => buildEpisodeMap(seasons))
   const [, startTransition] = useTransition()
 
@@ -47,6 +48,9 @@ export function SeasonAccordion({ seasons, mediaItemId: _mediaItemId }: SeasonAc
   useEffect(() => {
     setEpisodeMap(buildEpisodeMap(seasons))
   }, [seasons])
+
+  const allEpisodes = Object.values(episodeMap)
+  const allTitleWatched = allEpisodes.length > 0 && allEpisodes.every((e) => e.is_watched)
 
   function handleToggleEpisode(episodeId: string, isWatched: boolean) {
     const previous = episodeMap[episodeId]
@@ -88,11 +92,60 @@ export function SeasonAccordion({ seasons, mediaItemId: _mediaItemId }: SeasonAc
     })
   }
 
+  function handleMarkAllTitle() {
+    const targetWatched = !allTitleWatched
+    const previousMap = { ...episodeMap }
+    const now = new Date().toISOString()
+
+    setEpisodeMap((prev) => {
+      const updated = { ...prev }
+      for (const id of Object.keys(updated)) {
+        updated[id] = { ...updated[id], is_watched: targetWatched, watched_at: targetWatched ? now : null }
+      }
+      return updated
+    })
+
+    startTransition(async () => {
+      try {
+        await withRetry(() => markAllTitle(mediaItemId, targetWatched))
+      } catch {
+        setEpisodeMap(previousMap)
+        toast.error('Ошибка сохранения')
+      }
+    })
+  }
+
   return (
     <div className="space-y-2" data-testid="season-accordion">
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-        Прогресс
-      </h3>
+      {/* Progress header with title-level mark-all button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Прогресс
+          </h3>
+          {allTitleWatched && (
+            <div className="relative group">
+              <CheckCircle2
+                className="w-4 h-4 text-green-500"
+                data-testid="title-watched-indicator"
+              />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs bg-popover text-popover-foreground border border-border rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                Тайтл просмотрен
+              </div>
+            </div>
+          )}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className={`h-7 text-xs transition-colors ${allTitleWatched ? 'border-orange-500 text-orange-500 hover:border-orange-400 hover:text-orange-400' : ''}`}
+          onClick={handleMarkAllTitle}
+          data-testid="mark-all-title-button"
+        >
+          {allTitleWatched ? 'Снять отметку' : 'Отметить всё'}
+        </Button>
+      </div>
+
       <Accordion type="multiple" className="space-y-2">
         {seasons.map((season) => {
           const episodes = season.episodes.map((ep) => episodeMap[ep.id] ?? ep)
@@ -117,11 +170,12 @@ export function SeasonAccordion({ seasons, mediaItemId: _mediaItemId }: SeasonAc
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs"
+                    className={`h-7 text-xs transition-colors ${allWatched ? 'border-orange-500 text-orange-500 hover:border-orange-400 hover:text-orange-400' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation()
                       handleMarkSeason(season)
                     }}
+                    data-testid={`mark-season-button-${season.id}`}
                   >
                     {allWatched ? 'Снять отметку' : 'Отметить всё'}
                   </Button>

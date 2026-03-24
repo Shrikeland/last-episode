@@ -126,3 +126,27 @@ export async function markAllEpisodesWatched(
 
   if (error) throw error
 }
+
+export async function markAllEpisodesUnwatched(
+  client: Client,
+  mediaItemId: string
+): Promise<void> {
+  const { data: seasons, error: seasonsError } = await client
+    .from('seasons')
+    .select('id')
+    .eq('media_item_id', mediaItemId)
+
+  if (seasonsError || !seasons || seasons.length === 0) return
+
+  const seasonIds = (seasons as { id: string }[]).map((s) => s.id)
+
+  const { error } = await client
+    .from('episodes')
+    .update({
+      is_watched: false,
+      watched_at: null,
+    })
+    .in('season_id', seasonIds)
+
+  if (error) throw error
+}

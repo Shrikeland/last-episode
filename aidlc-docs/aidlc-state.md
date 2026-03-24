@@ -75,6 +75,11 @@
   - [x] Infrastructure Design
   - [x] Code Generation
   - [x] Build Verification — npm run build ✓ (/auth/callback, /email-confirmed, register inline errors)
+- [x] Unit 9 - Mark All Enhancement
+  - [x] Functional Design — SKIP
+  - [x] Infrastructure Design — SKIP
+  - [x] Code Generation
+  - [x] Build Verification — npm run build ✓ (SeasonAccordion: mark-all title btn, orange border, green checkmark)
 - [ ] Build and Test
 
 ### OPERATIONS PHASE
@@ -83,4 +88,4 @@
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
 - **Current Stage**: CONSTRUCTION PHASE — Build and Test
-- **Status**: All 8 units complete (builds verified). Ready for final Build and Test phase (deploy to Vercel + Supabase Cloud).
+- **Status**: All 9 units complete (builds verified). Unit 9: Mark All Enhancement complete.
