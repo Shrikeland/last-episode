@@ -53,7 +53,7 @@ export default function LoginPage() {
 
   return (
     <Card className="w-full max-w-md" data-testid="login-card">
-      <CardHeader className="space-y-1">
+      <CardHeader className="space-y-1 text-center">
         <CardTitle className="text-2xl font-bold tracking-tight">
           Добро пожаловать
         </CardTitle>

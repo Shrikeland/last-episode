@@ -17,12 +17,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/
 
 function getUsernameError(value: string): string | null {
   if (!value) return null
   if (/\s/.test(value)) return 'Пробелы не допускаются — используй _ вместо пробела'
-  if (!/^[a-z0-9_]+$/.test(value)) return 'Только латинские буквы a–z, цифры 0–9 и символ _'
+  if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Только латинские буквы, цифры 0–9 и символ _'
   if (value.length < 3) return 'Минимум 3 символа'
   return null
 }
@@ -109,7 +109,7 @@ export default function RegisterPage() {
 
   return (
     <Card className="w-full max-w-md" data-testid="register-card">
-      <CardHeader className="space-y-1">
+      <CardHeader className="space-y-1 text-center">
         <CardTitle className="text-2xl font-bold tracking-tight">
           Создать аккаунт
         </CardTitle>
@@ -127,7 +127,7 @@ export default function RegisterPage() {
               type="text"
               placeholder="например: ivan_petrov"
               value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase())}
+              onChange={(e) => setUsername(e.target.value)}
               required
               autoComplete="username"
               data-testid="register-username-input"
@@ -139,7 +139,7 @@ export default function RegisterPage() {
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                По нему вас найдут другие — как username в Telegram
+                По нему вас найдут другие. Латиница, цифры и _
               </p>
             )}
           </div>
@@ -170,7 +170,7 @@ export default function RegisterPage() {
                 required
                 autoComplete="new-password"
                 data-testid="register-password-input"
-                className="pr-10"
+                className={`pr-10 ${password && password.length < 6 ? 'border-destructive focus-visible:ring-destructive' : ''}`}
               />
               <button
                 type="button"
@@ -182,6 +182,9 @@ export default function RegisterPage() {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {password && password.length < 6 && (
+              <p className="text-xs text-destructive">Минимум 6 символов</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -196,7 +199,7 @@ export default function RegisterPage() {
                 required
                 autoComplete="new-password"
                 data-testid="register-confirm-password-input"
-                className="pr-10"
+                className={`pr-10 ${confirmPassword && confirmPassword !== password ? 'border-destructive focus-visible:ring-destructive' : ''}`}
               />
               <button
                 type="button"
@@ -208,6 +211,9 @@ export default function RegisterPage() {
                 {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {confirmPassword && confirmPassword !== password && (
+              <p className="text-xs text-destructive">Пароли не совпадают</p>
+            )}
           </div>
 
           {formError && (

@@ -80,6 +80,11 @@
   - [x] Infrastructure Design — SKIP
   - [x] Code Generation
   - [x] Build Verification — npm run build ✓ (SeasonAccordion: mark-all title btn, orange border, green checkmark)
+- [x] Unit 10 - Auth Form Polish
+  - [x] Functional Design — SKIP
+  - [x] Infrastructure Design — SKIP
+  - [x] Code Generation
+  - [x] Build Verification — npm run build ✓ (username case, centered headers, inline password validation)
 - [ ] Build and Test
 
 ### OPERATIONS PHASE
