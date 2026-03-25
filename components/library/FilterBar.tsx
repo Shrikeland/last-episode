@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useLayoutEffect } from 'react'
+import { useCallback, useEffect, useRef, useState, useLayoutEffect, useTransition } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search } from 'lucide-react'
+import { Search, Loader2 } from 'lucide-react'
 import { MEDIA_STATUS_LABELS } from '@/types'
 import type { MediaStatus } from '@/types'
 
@@ -28,13 +28,23 @@ interface FilterBarProps {
 export function FilterBar({ currentFilters }: FilterBarProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
   const [search, setSearch] = useState(currentFilters.search ?? '')
+  const [isDebouncing, setIsDebouncing] = useState(false)
   const filtersRef = useRef(currentFilters)
   const mountedRef = useRef(false)
+  // Tracks the last value we sent to the URL — prevents sync effect from
+  // overwriting the input while the user is still typing
+  const lastSentRef = useRef(currentFilters.search ?? '')
 
-  // Sync search input when filters are reset externally (e.g. "Сбросить фильтры")
+  // Sync search input only when filters are reset externally (e.g. "Сбросить фильтры")
+  // Skip if the change came from our own debounced update
   useEffect(() => {
-    setSearch(currentFilters.search ?? '')
+    const incoming = currentFilters.search ?? ''
+    if (incoming !== lastSentRef.current) {
+      setSearch(incoming)
+      lastSentRef.current = incoming
+    }
   }, [currentFilters.search])
   useEffect(() => { filtersRef.current = currentFilters }, [currentFilters])
   useLayoutEffect(() => { mountedRef.current = true }, [])
@@ -46,7 +56,9 @@ export function FilterBar({ currentFilters }: FilterBarProps) {
       for (const [k, v] of Object.entries(merged)) {
         if (v && v !== 'all') params.set(k, v)
       }
-      router.replace(`${pathname}?${params.toString()}`)
+      startTransition(() => {
+        router.replace(`${pathname}?${params.toString()}`)
+      })
     },
     [pathname, router]
   )
@@ -54,8 +66,13 @@ export function FilterBar({ currentFilters }: FilterBarProps) {
   // Debounce поиска — пропускаем первый рендер
   useEffect(() => {
     if (!mountedRef.current) return
+    if (search.trim()) setIsDebouncing(true)
     const timer = setTimeout(() => {
-      updateUrl({ search })
+      lastSentRef.current = search
+      setIsDebouncing(false)
+      if (search !== (filtersRef.current.search ?? '')) {
+        updateUrl({ search })
+      }
     }, 400)
     return () => clearTimeout(timer)
   }, [search, updateUrl])
@@ -64,7 +81,13 @@ export function FilterBar({ currentFilters }: FilterBarProps) {
     <div className="flex flex-wrap gap-3">
       {/* Поиск */}
       <div className="relative flex-1 min-w-[200px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <span className="absolute left-3 top-1/2 -translate-y-1/2">
+          {isDebouncing || isPending ? (
+            <Loader2 className="h-4 w-4 text-[#E67E22] animate-spin" />
+          ) : (
+            <Search className="h-4 w-4 text-muted-foreground" />
+          )}
+        </span>
         <Input
           placeholder="Поиск по названию..."
           value={search}

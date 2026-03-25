@@ -39,11 +39,13 @@ export function SearchInput() {
   return (
     <div className="space-y-4">
       <div className="relative">
-        {isLoading ? (
-          <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
-        ) : (
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        )}
+        <span className="absolute left-3 top-1/2 -translate-y-1/2">
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 text-[#E67E22] animate-spin" />
+          ) : (
+            <Search className="h-4 w-4 text-muted-foreground" />
+          )}
+        </span>
         <Input
           placeholder="Название фильма, сериала или аниме..."
           value={query}
