@@ -19,9 +19,10 @@ const NAV_LINKS = [
 
 interface NavbarProps {
   username: string
+  pendingRequestsCount?: number
 }
 
-export function Navbar({ username }: NavbarProps) {
+export function Navbar({ username, pendingRequestsCount = 0 }: NavbarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createBrowserClient()
@@ -61,7 +62,7 @@ export function Navbar({ username }: NavbarProps) {
                 href={href}
                 data-testid={`navbar-link-${href.replace('/', '')}`}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  'relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors',
                   pathname === href || pathname.startsWith(href + '/')
                     ? 'bg-accent/10 text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
@@ -69,6 +70,11 @@ export function Navbar({ username }: NavbarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
+                {href === '/community' && pendingRequestsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
@@ -126,6 +132,11 @@ export function Navbar({ username }: NavbarProps) {
               >
                 <Icon className="h-5 w-5" />
                 {label}
+                {href === '/community' && pendingRequestsCount > 0 && (
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
+                  </span>
+                )}
               </Link>
             ))}
             <div className="my-1 border-t border-border" />
