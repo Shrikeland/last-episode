@@ -93,7 +93,10 @@ episodes
   tmdb_episode_id integer
 ```
 
-RLS: all tables locked to `auth.uid() = user_id`.
+RLS: most tables locked to `auth.uid() = user_id`.
+Exception — relational tables where a record involves **two users** (e.g. `friendships`):
+SELECT policy must cover both sides: `user_id = auth.uid() OR friend_id = auth.uid()`.
+See `plans/patches/bidirectional-friendship-rls.md`.
 
 ---
 
@@ -112,9 +115,19 @@ RLS: all tables locked to `auth.uid() = user_id`.
 
 ### AI Recommendations (Groq)
 - Endpoint: `/api/recommendations` — streams Server-Sent Events
-- Uses `llama-3.3-70b-versatile` model via Groq SDK
+- Uses `llama-4-scout-17b` model via Groq SDK
 - Client reads the stream with `EventSource` / `ReadableStream`
 - Recommendation context built from user's `media_items` (genres, statuses, titles)
+- **Never use regex to extract JSON from LLM output** — use bracket-counting `extractJsonArray()`.
+  LLMs append arbitrary text after the array; greedy `[\s\S]*` matches to the last `]`.
+  See `plans/patches/llm-streaming-json-greedy-regex.md`.
+
+### shadcn/ui — interactive element nesting
+shadcn triggers (`AccordionTrigger`, `SelectTrigger`, `DialogTrigger`, etc.) render a `<button>` internally.
+**Never nest another `<button>` or `<a>` inside them** — invalid HTML, browser silently breaks DOM and event handlers.
+If you need an action alongside a trigger, place it outside, or drop down to the headless Radix Primitive
+(e.g. `AccordionPrimitive.Trigger` instead of `AccordionTrigger`).
+See `plans/patches/shadcn-accordion-trigger-button-nesting.md`.
 
 ### Search
 - Debounce: `useRef` + 400ms timeout (NOT `useState` — prevents stale closure issues)
@@ -123,7 +136,7 @@ RLS: all tables locked to `auth.uid() = user_id`.
 ---
 
 ## Constraints & Known Limitations
-- `@supabase/supabase-js` must stay at `^2.x` (SSR package incompatible with v3)
+- `@supabase/supabase-js` pinned at `2.46.2` (no `^`) — caret range allowed npm to pull a breaking minor; `@supabase/ssr` incompatible with v3. See `plans/patches/supabase-version-lock.md`.
 - Playwright not yet added — integration tests are manual for now
 - No light theme (dark only by design)
 - TMDB `runtime` for episodes falls back to `episode_run_time[0]` when per-episode data missing

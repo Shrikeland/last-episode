@@ -78,7 +78,7 @@ For auth-related changes: manually test login/logout flow.
 | No server/client boundary violation | All components |
 | `npm run build` must pass before finishing any unit | All units |
 | Playwright or integration test required for: login/logout, add to library, status change, stats | UI/DB/auth changes |
-| `@supabase/supabase-js` stays at `^2.x` | Dependency updates |
+| `@supabase/supabase-js` pinned at exact version (no `^`) — do NOT bump without a dedicated branch + full build | Dependency updates |
 
 ---
 
