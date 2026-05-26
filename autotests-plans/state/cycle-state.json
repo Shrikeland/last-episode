@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-05-26T00:00:00Z",
+  "updated_by": "bootstrap",
+  "bootstrap": {
+    "global_explore_done": false,
+    "scaffold_done": false
+  },
+  "active": {
+    "area": null,
+    "phase": "GLOBAL_EXPLORE"
+  },
+  "queue": [],
+  "completed_areas": [],
+  "blocked": null,
+  "last_run": null
+}
