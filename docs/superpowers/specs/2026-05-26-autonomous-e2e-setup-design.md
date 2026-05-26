@@ -27,7 +27,7 @@
 ## Constraints
 
 - **Никаких прав на новую инфраструктуру** — только Anthropic scheduled tasks и существующий git-workflow.
-- **Никаких изменений основного приложения** — тесты гоняются против deployed Vercel-окружения. Backend (Supabase) — боевой, тестовый юзер.
+- **Изменения основного приложения только ради testability** — на фазе `LOCATOR_AUDIT` агент имеет право модифицировать компоненты в `components/` и `app/`, но строго для добавления accessibility-семантики (role, aria-label, htmlFor, замена `<div onClick>` на `<button>`). Любая такая правка обязана пройти `npm run lint` + `npm run build` зелёным; иначе откат. Тесты гоняются против deployed Vercel-окружения; backend (Supabase) — боевой, тестовый юзер.
 - **Не ломать существующие правила репо** — `npm run build` / `npm run lint` должны оставаться зелёными в основном пайплайне; e2e живёт в отдельной папке с собственным `package.json`.
 - **Локи версий из CLAUDE.md незыблемы** — `framer-motion@11.14.4`, `@supabase/supabase-js@2.46.2`, `motion-dom@11.14.3`. Playwright не должен принести конфликтующие транзитивные deps в основной lock.
 
@@ -104,8 +104,9 @@ last-episode/                              # корень репо
 │   └── areas/<area>/
 │       ├── 01-exploration.md
 │       ├── 02-test-cases.md
-│       ├── 03-implementation.md
-│       └── 04-coverage-matrix.md
+│       ├── 03-locator-audit.md           # NEW — accessibility-first локаторы + app fixes
+│       ├── 04-implementation.md
+│       └── 05-coverage-matrix.md
 │
 ├── .claude/
 │   ├── settings.local.json                # обновлённый allow-list
@@ -178,9 +179,10 @@ last-episode/                              # корень репо
 | `SCAFFOLD` | Создаёт Playwright проект в `e2e/` (один раз) | `e2e/package.json`, `playwright.config.ts`, smoke-тест зелёный |
 | `AREA_EXPLORE` | Исследует одну область приложения | `areas/<area>/01-exploration.md` |
 | `TEST_CASES` | Пишет QA-кейсы через `qa-test-planner` | `areas/<area>/02-test-cases.md` |
-| `IMPLEMENT` | Пишет Playwright тесты | файлы в `e2e/tests/<area>/` + `03-implementation.md` |
+| `LOCATOR_AUDIT` | По кейсам подбирает accessibility-first локаторы; при отсутствии — правит app-компоненты через `vercel-react-best-practices` | `areas/<area>/03-locator-audit.md` + (опц.) app-правки; `npm run lint && npm run build` зелёные |
+| `IMPLEMENT` | Пишет Playwright тесты, используя локаторы из 03-audit | файлы в `e2e/tests/<area>/` + `04-implementation.md` |
 | `VERIFY` | Прогоняет тесты до зелёного | 2 последовательных зелёных run |
-| `DOCUMENT` | Заполняет coverage matrix | `areas/<area>/04-coverage-matrix.md` без MISSING/PARTIAL |
+| `DOCUMENT` | Заполняет coverage matrix | `areas/<area>/05-coverage-matrix.md` без MISSING/PARTIAL |
 | `DONE` | Открывает PR, область → `completed_areas` | PR создан, state обновлён |
 | `IDLE` | Все области покрыты | `blocked: { reason: "all-areas-complete" }`, no-op runs |
 
@@ -194,6 +196,11 @@ last-episode/                              # корень репо
                                        ▼
                                   TEST_CASES
                                        │
+                                       ▼
+                               LOCATOR_AUDIT ──(app-fix needed)──→ edit component
+                                       │                            npm run lint
+                                       │                            npm run build
+                                       │←───────────────────────────┘
                                        ▼
                                   IMPLEMENT
                                        │
@@ -292,12 +299,58 @@ last-episode/                              # корень репо
   - `test_data` (какие данные нужны)
   - `automation_status` (initial: NOT_AUTOMATED)
 - Кейсы должны быть пригодны и для ручного QA, и для Playwright реализации.
+- Кейсы пишутся на языке пользователя ("нажимает Sign in"), а не на языке
+  локаторов — перевод в технические локаторы происходит в следующей фазе.
+
+### LOCATOR_AUDIT
+- Для каждого пользовательского шага из 02-test-cases.md найди целевой
+  элемент в коде приложения (components/, app/(app)/<area>/).
+- Применяй иерархию локаторов из 1.1:playwright-best-practices:
+    1. getByRole('<role>', { name: '<accessible-name>' })
+    2. getByLabel(...)
+    3. getByText(...)   (только если визуальный текст стабилен)
+    4. getByTestId(...) (data-testid уже частично реализованы — допустимо)
+    5. CSS / XPath      (ЗАПРЕЩЕНО без явного обоснования в audit doc)
+- Для каждого элемента, у которого локатор уровней 1-3 недоступен:
+    a. Сначала смотри, можно ли добавить семантику без поломок:
+         • aria-label на <button> / <a> / интерактивный <div>
+         • <button>...</button> вместо <div onClick=...>
+         • role="..." если нативного role нет
+         • <label htmlFor>/<input id> для форм
+         • alt="" для значимых <img>
+    b. Если требуется рефакторинг компонента — используй
+       `vercel-react-best-practices` для понимания SSR/RSC ограничений
+       (нельзя добавлять onClick на серверный компонент, надо ли
+       добавлять 'use client', и т.д.).
+    c. Ограничение blast radius: правки ТОЛЬКО в компонентах, которые
+       реально используются в текущей области. Никаких drive-by
+       рефакторингов соседних страниц или общих компонентов, если они
+       не задействованы в текущих test-cases.
+    d. После каждого редактирования компонента:
+         • `npm run lint` (0 errors)
+         • `npm run build` (0 errors)
+       Оба зелёные → правка принята. Любой красный → откат правки,
+       fallback на следующий тир локаторов (как правило getByTestId).
+- Артефакт: `autotests-plans/areas/<area>/03-locator-audit.md`. Структура:
+    ## Locator map
+    | case_id | step | element | chosen locator | strategy_tier |
+    ## Component changes
+    | file | change summary | rationale | build_ok | lint_ok |
+    ## Fallback decisions
+    (если где-то пришлось использовать data-testid / прочее и почему)
+- App-правки коммитятся отдельным коммитом ДО IMPLEMENT, формат:
+  `refactor(<area>): a11y locators for <component-names>`
+- Если для какого-то шага НИ ОДНА из стратегий 1-4 не подходит и app-правка
+  невозможна (например, элемент рендерится сторонней библиотекой без
+  возможности переопределить семантику) — `blocked: { reason: "locator-impossible", area, step, suggestion }`. Эскалация.
 
 ### IMPLEMENT
+- Прочти `autotests-plans/areas/<area>/03-locator-audit.md` — там готовая
+  карта локаторов и пометки о fallback-стратегиях.
 - Используй `1.1:playwright-best-practices` для каждого нового файла.
 - Page Object Model:
   - Один `<Area>Page` класс на каждую страницу/раздел в `pages/`.
-  - Селекторы preferentially через `getByRole`, `getByLabel`, `getByTestId`.
+  - Селекторы строго из 03-locator-audit.md (не выдумывай свои).
 - Fixtures:
   - `auth.fixture.ts` логинится один раз через UI и сохраняет storageState.
   - `data.fixture.ts` для тестовых данных (если применимо).
@@ -312,8 +365,9 @@ last-episode/                              # корень репо
 - Артефакты:
   - `e2e/tests/<area>/*.spec.ts` — по одному файлу на feature внутри области
     (например, `library/add-title.spec.ts`, `library/delete-title.spec.ts`).
-  - `autotests-plans/areas/<area>/03-implementation.md` — карта файлов:
+  - `autotests-plans/areas/<area>/04-implementation.md` — карта файлов:
     кейс из 02 → файл/тест → краткое описание стратегии.
+- Коммит-формат: `test(e2e/<area>): <feature>` (отдельные коммиты на feature).
 
 ### VERIFY
 - `cd e2e && npx playwright test tests/<area> --reporter=list,html`
@@ -332,7 +386,7 @@ last-episode/                              # корень репо
 
 ### DOCUMENT
 - Используй `qa-test-planner` для генерации coverage matrix.
-- Артефакт: `autotests-plans/areas/<area>/04-coverage-matrix.md`:
+- Артефакт: `autotests-plans/areas/<area>/05-coverage-matrix.md`:
   - Таблица: `case_id | title | priority | status | spec_file | last_green_at`
   - `status`: COVERED | MISSING | PARTIAL | SKIPPED
   - Все COVERED — это passing tests. Никаких MISSING или PARTIAL для DONE.
@@ -340,7 +394,11 @@ last-episode/                              # корень репо
 
 ### DONE
 - `gh pr create --base main --head e2e/autotests --title "test(e2e/<area>): coverage" --body "..."`
-- Body PR'а: ссылки на все 4 артефакта области + сводка покрытия.
+- Body PR'а: ссылки на все 5 артефактов области + сводка покрытия + список
+  компонентов, которые были модифицированы в LOCATOR_AUDIT (если были).
+- PR содержит две группы коммитов (если LOCATOR_AUDIT правил app-код):
+  1. `refactor(<area>): a11y locators for ...` (изменения components/, app/)
+  2. `test(e2e/<area>): <feature>` (один или несколько тест-коммитов)
 - В state: `active.area → completed_areas`, `active.phase = AREA_EXPLORE`,
   `active.area = queue.shift()`. Если queue пуста → IDLE.
 
@@ -536,7 +594,7 @@ Bootstrap считается успешным когда:
 
 3. **С третьего run'а**: цикл по областям в порядке `queue`. Каждый run = одна фаза первой области.
 
-При cadence `10 */5 * * *` это даёт ~5 фаз/сутки. Покрытие одной области занимает 5 фаз (AREA_EXPLORE → DOCUMENT), т.е. ~1 область в сутки в идеальном сценарии, замедляясь при VERIFY-падениях.
+При cadence `10 */5 * * *` это даёт ~5 фаз/сутки. Покрытие одной области занимает 6 фаз (AREA_EXPLORE → TEST_CASES → LOCATOR_AUDIT → IMPLEMENT → VERIFY → DOCUMENT), т.е. ~1.2 суток на область в идеальном сценарии. Замедление возможно на VERIFY (флаки) или LOCATOR_AUDIT (если требуются большие a11y-правки в app-коде).
 
 ## Out of scope
 
@@ -555,6 +613,8 @@ Bootstrap считается успешным когда:
 3. **Стабильность LLM-streaming тестов (рекомендации).** Эти тесты могут быть фундаментально flaky из-за реальных Groq вызовов. Возможно понадобятся API-моки на route-level — отложим до фазы IMPLEMENT для области `recommendations`.
 4. **Существующие hooks** в `.claude/settings.local.json` ссылаются на `/Users/hornysennin/Desktop/projects/autotests/.claude/hooks/*.mp3` — путь вне репо. Если файлов нет, `afplay` молча падает (не блокирует). Известный issue, решение оставлено пользователю.
 5. **Конфликт версий TypeScript.** В корневом `package.json` уже `typescript@^5`, в `e2e/package.json` будет своя строгая версия (5.7+). Изолированный `node_modules` в `e2e/` должен предотвратить hoisting-конфликты, но если npm workspaces включится по умолчанию — добавим `"workspaces"` явно или используем pnpm для e2e/.
+
+6. **Объём accessibility-правок неизвестен.** LOCATOR_AUDIT может вскрыть, что текущее приложение имеет много мест без подходящих role/name. Если в первой области (auth) понадобится >10 компонентных правок — это сигнал, что нужен отдельный **pre-cycle accessibility sweep** (одноразовая фаза до старта area-цикла), а не «по одной правке на область». Решение отложено до фактических данных от первой итерации. Если так случится — агент откроет issue/PR с обоснованием и поставит `blocked: { reason: "a11y-sweep-needed" }`.
 
 ## Next steps after this spec
 
