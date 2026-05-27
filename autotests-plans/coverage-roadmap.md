@@ -64,7 +64,7 @@ auth → search → library → media → stats → community → profile → re
 | Область | Статус |
 |---------|--------|
 | auth | ✅ DONE |
-| search | 🔲 PENDING |
+| search | ✅ DONE |
 | library | 🔲 PENDING |
 | media | 🔲 PENDING |
 | stats | 🔲 PENDING |
