@@ -16,6 +16,10 @@
     "reason": "all-areas-complete",
     "needs_human": true
   },
+  "daily_runs": {
+    "date": "2026-05-27",
+    "count": 1
+  },
   "last_run": {
     "phase": "DOCUMENT",
     "area": "recommendations",
