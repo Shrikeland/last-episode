@@ -1,27 +1,25 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-05-27T06:00:00Z",
+  "updated_at": "2026-05-27T08:00:00Z",
   "updated_by": "e2e-agent",
   "bootstrap": {
     "global_explore_done": true,
     "scaffold_done": true
   },
   "active": {
-    "area": "media",
-    "phase": "AREA_EXPLORE"
+    "area": null,
+    "phase": "IDLE"
   },
-  "queue": [
-    "stats",
-    "community",
-    "profile",
-    "recommendations"
-  ],
-  "completed_areas": ["auth", "search", "library"],
-  "blocked": null,
+  "queue": [],
+  "completed_areas": ["auth", "search", "library", "media", "stats", "community", "profile", "recommendations"],
+  "blocked": {
+    "reason": "all-areas-complete",
+    "needs_human": true
+  },
   "last_run": {
     "phase": "DOCUMENT",
-    "area": "library",
-    "completed_at": "2026-05-27T06:00:00Z",
-    "summary": "library DONE: 7 test cases all COVERED. LibraryPage POM. 2 stable runs. Advancing to media."
+    "area": "recommendations",
+    "completed_at": "2026-05-27T08:00:00Z",
+    "summary": "All 8 areas completed. 46 total tests (44 integration skip in sandbox / run in CI, 2 scaffold always-green). Full suite: 2 passed, 44 skipped, 0 failed."
   }
 }
