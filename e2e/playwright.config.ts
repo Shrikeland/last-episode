@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 import * as dotenv from 'dotenv'
-import * as path from 'path'
+import * as path from 'path' // needed for dotenv path resolution
 
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 
@@ -10,7 +10,6 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH && require('fs').existsSync('/opt/pw-b
 }
 
 const BASE_URL = process.env.BASE_URL || 'https://www.episode.watch'
-const isLocal = BASE_URL.startsWith('http://localhost') || BASE_URL.startsWith('http://127.0.0.1')
 
 export default defineConfig({
   testDir: './tests',
@@ -20,18 +19,6 @@ export default defineConfig({
   workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],
 
-  // When BASE_URL points to localhost, Playwright starts Next.js automatically.
-  // reuseExistingServer: true — reuses whatever is already running on that port.
-  webServer: isLocal
-    ? {
-        command: 'npm run dev',
-        url: BASE_URL,
-        reuseExistingServer: true,
-        cwd: path.resolve(__dirname, '..'),
-        timeout: 120_000,
-      }
-    : undefined,
-
   use: {
     baseURL: BASE_URL,
     trace: 'retain-on-failure',
@@ -39,6 +26,10 @@ export default defineConfig({
     video: 'retain-on-failure',
     headless: process.env.HEADLESS !== 'false',
     ignoreHTTPSErrors: true,
+    // Vercel Protection Bypass — set VERCEL_BYPASS_SECRET in CI secrets
+    extraHTTPHeaders: process.env.VERCEL_BYPASS_SECRET
+      ? { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS_SECRET }
+      : {},
   },
 
   projects: [
