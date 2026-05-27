@@ -11,12 +11,8 @@ const BASE_URL = process.env.BASE_URL || 'https://www.episode.watch'
 
 async function isUrlReachable(url: string): Promise<boolean> {
   try {
-    const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(5000) })
-    if (res.status === 403) return false
-    const body = await res.text()
-    // Vercel/proxy returns this when IP is not allowed
-    if (body.trim() === 'Host not in allowlist') return false
-    return res.status < 500
+    const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(8000) })
+    return res.status < 500 && res.status !== 403
   } catch {
     return false
   }
