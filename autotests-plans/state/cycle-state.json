@@ -1,28 +1,27 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-05-27T05:00:00Z",
+  "updated_at": "2026-05-27T06:00:00Z",
   "updated_by": "e2e-agent",
   "bootstrap": {
     "global_explore_done": true,
     "scaffold_done": true
   },
   "active": {
-    "area": "library",
+    "area": "media",
     "phase": "AREA_EXPLORE"
   },
   "queue": [
-    "media",
     "stats",
     "community",
     "profile",
     "recommendations"
   ],
-  "completed_areas": ["auth", "search"],
+  "completed_areas": ["auth", "search", "library"],
   "blocked": null,
   "last_run": {
     "phase": "DOCUMENT",
-    "area": "search",
-    "completed_at": "2026-05-27T05:00:00Z",
-    "summary": "search DONE: 8 test cases all COVERED. SearchPage POM created. 2 stable runs. Advancing to library."
+    "area": "library",
+    "completed_at": "2026-05-27T06:00:00Z",
+    "summary": "library DONE: 7 test cases all COVERED. LibraryPage POM. 2 stable runs. Advancing to media."
   }
 }

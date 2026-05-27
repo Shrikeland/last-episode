@@ -65,7 +65,7 @@ auth → search → library → media → stats → community → profile → re
 |---------|--------|
 | auth | ✅ DONE |
 | search | ✅ DONE |
-| library | 🔲 PENDING |
+| library | ✅ DONE |
 | media | 🔲 PENDING |
 | stats | 🔲 PENDING |
 | community | 🔲 PENDING |
