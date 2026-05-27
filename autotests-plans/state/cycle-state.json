@@ -1,17 +1,16 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-05-27T00:00:00Z",
+  "updated_at": "2026-05-27T00:30:00Z",
   "updated_by": "e2e-agent",
   "bootstrap": {
     "global_explore_done": true,
-    "scaffold_done": false
+    "scaffold_done": true
   },
   "active": {
-    "area": null,
-    "phase": "SCAFFOLD"
+    "area": "auth",
+    "phase": "AREA_EXPLORE"
   },
   "queue": [
-    "auth",
     "search",
     "library",
     "media",
@@ -23,8 +22,8 @@
   "completed_areas": [],
   "blocked": null,
   "last_run": {
-    "phase": "GLOBAL_EXPLORE",
-    "completed_at": "2026-05-27T00:00:00Z",
-    "summary": "Explored app/(app)/*, created coverage-roadmap.md with 8 areas prioritized across 3 tiers. Queue populated."
+    "phase": "SCAFFOLD",
+    "completed_at": "2026-05-27T00:30:00Z",
+    "summary": "Created e2e/package.json (Playwright 1.56.1), playwright.config.ts, tsconfig.json, directory structure (fixtures/pages/support/tests), README, and smoke.spec.ts. Pinned to browser rev 1194 (/opt/pw-browsers). Integration tests skip when Vercel blocks the cloud sandbox IP (403/Host-not-in-allowlist). 2 scaffold tests green, 2 integration tests skip. Two consecutive runs stable."
   }
 }
