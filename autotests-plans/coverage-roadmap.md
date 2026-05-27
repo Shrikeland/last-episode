@@ -63,7 +63,7 @@ auth → search → library → media → stats → community → profile → re
 
 | Область | Статус |
 |---------|--------|
-| auth | 🔲 PENDING |
+| auth | ✅ DONE |
 | search | 🔲 PENDING |
 | library | 🔲 PENDING |
 | media | 🔲 PENDING |
